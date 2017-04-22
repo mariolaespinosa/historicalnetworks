@@ -1,0 +1,64 @@
+---
+title: "Mapping Historical Citation Networks"
+author: "Mariola Espinosa and Frederick Solt"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: vignette.bib
+vignette: >
+  %\VignetteIndexEntry{historicalnetworks: Mapping Historical Citation Networks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{ASCII}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Building a Corpus of Internet Archive Texts
+
+The starting place is the [Internet Archive's library of texts](https://archive.org/details/texts), which at the time of this writing comprises more than eleven million fully accessable volumes. The package `internetarchive` allows R users to search and retrieve the metadata of this trove of material and to download text files for each work it contains. `PKGNAME` provides the convenience function `build_corpus()` that streamlines this process.  It downloads the OCR text versions of works found by searching the Internet Archive's metadata for the specified `keywords` over a given `date_range` (provided in the format "yyyy TO yyyy"), and it returns a dataframe that includes selected metadata about the retrieved works along with the location of the corresponding text files.  Because this process may take considerable time, upon completion by default the `build_corpus()` function will chime; this may be turned off by setting the argument `chime = FALSE`.  It is also a good idea to save the resulting dataframe.
+
+```{r eval=FALSE}
+yf_corpus <- build_corpus(keywords = "yellow fever",
+                         date_range = "1700 TO 1899")
+
+# saving this output is a good idea, given the runtime 
+save(list = "yf_corpus", file = "data/yf_corpus.rda")
+```
+
+## Omitting Duplicate Works
+
+The Internet Archive's texts collection includes works scanned from many libraries, and as a result, many works are included more than once.  Moreover, the lack of uniformity in the formatting of metadata and the presence of multivolume works make identifying duplicates a not completely straightforward process.  The `omit_duplicates` function takes a fairly conservative approach to filtering out these duplicates.  By default, the function considers works to be duplicates if the first ten words of the title are identical and they have the same publication date and volume number, as well as either the same author last name or the same city of publication (formatting differences are particularly common for these two pieces of metadata).  Setting the `strict` argument to `TRUE` will only consider works to be duplicates if they share both the same author last name and the same city of publication.
+
+```{r eval=FALSE}
+yf_corpus <- yf_corpus %>% 
+    omit_duplicates()
+```
+
+
+## Subsetting the Corpus
+
+It will be often useful to filter the original corpus by some _content_ of the works.  Because `build_corpus` only searches the metadata---not the actual texts---of the Internet Archive's text collection, it is unsuited for this task.  The `subset_corpus` function searches the corpus's downloaded text files for a particular word, set of words, or [regular expression](http://r4ds.had.co.nz/strings.html#matching-patterns-with-regular-expressions) and returns the subset of the corpus that contains them.  Note that this function may take a few minutes to complete.
+
+```{r eval=FALSE}
+miasma_yf <- yf_corpus %>% 
+    subset_corpus("miasma")
+```
+
+It may also be desirable to focus on books rather than journal articles---not least for the practical reason that it is the journal volume that is cataloged as a work in the Internet Archive, not each individual article.  Restricting the corpus to only books can be achieved using the `filter` function of the `dplyr` package, along with `str_detect` from the `stringr` package, as shown below.
+
+```{r eval=FALSE}
+miasma_yf <- miasma_yf %>% 
+    filter(!(str_detect(title, "Magazine|Journal|Gazette|(Scientific American)")))
+```
+
+In our example, the number of works now falls from 274 to 267; that is, seven of the works that included the word "miasma" were volumes of journals.
+
+## Finding Potential Citing Works
+
+
+
+## Confirming Citing Works
+
+
+
