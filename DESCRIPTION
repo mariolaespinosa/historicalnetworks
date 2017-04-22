@@ -1,0 +1,24 @@
+Package: historicalnetworks
+Type: Package
+Title: Mapping Historical Citation Networks
+Version: 0.1.0
+Date: 2017-04-22
+Authors@R: c(
+    person("Mariola", "Espinosa", email = "mariola-espinosa@uiowa.edu", role = c("aut")),
+    person("Frederick", "Solt", email = "frederick-solt@uiowa.edu", role = c("aut", "cre")))
+URL: https://github.com/mariolaespinosa/historicalnetworks
+BugReports: https://github.com/mariolaespinosa/historicalnetworks/issues
+Description: 
+License: MIT + file LICENSE
+LazyData: TRUE
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports:
+  internetarchive,
+  dplyr,
+  tidyr,
+  stringr,
+  beepr
+RoxygenNote: 6.0.1
