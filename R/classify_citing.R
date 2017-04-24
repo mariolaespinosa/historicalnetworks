@@ -39,7 +39,7 @@
 classify_citing <- function(df, save_dir = ".") {
     file_name <- file.path(save_dir, paste0("classify_", deparse(substitute(df)), ".R"))
     df <- df %>%
-        arrange(author, date)
+        arrange(author, date, cited)
     if (!file.exists(file_name)) {
         file.create(file_name)
         cat("df$classification <- NA", file = file_name, sep="\n")
