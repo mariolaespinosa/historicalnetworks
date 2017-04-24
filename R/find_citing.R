@@ -7,36 +7,46 @@
 #' @param verbose Should the function provide information about its progress?
 #' 
 #' @details
-#' Details
 #' The `find_citing` function casts a broad net for citing works, returning all works that include the cited work's author's last name that were published in or after the cited work's year of publication.
 #' 
 #' @return A dataframe
 #'
 #' @examples
+#' rush1794 <- yf_corpus %>% 
+#'     filter(id = "101283166.nlm.nih.gov")
 #' 
-#' @importFrom dplyr `%>%` select mutate filter
+#' mentions_rush <- yf_corpus %>% 
+#'     find_citing(rush1794)
+#' 
+#' @importFrom dplyr "%>%" select mutate filter
 #' @importFrom stringr str_detect
 #'
 #' @export
 
-find_citing <- function(df, corpus, verbose = TRUE) {
-    cited_info <- df %>%
-        transmute(cited_author = ifelse(str_detect(author, ","), 
-                                        str_replace(author, "(^[^,]*).*", "\\1"),
-                                        author),
-                  cited_year = date,
-                  short_title = word(title, start = 1, end = 3, sep = "\\W+") %>% 
+find_citing <- function(corpus_df, df, verbose = TRUE) {
+    if (!("cited_author" %in% names(df)) | !("cited_year" %in% names(df))) {
+        cited_info <- df %>%
+            transmute(cited_author = ifelse(str_detect(author, ","), 
+                                            str_replace(author, "(^[^,]*).*", "\\1"),
+                                            author),
+                      cited_year = date,
+                      short_title = word(title, start = 1, end = 3, sep = "\\W+") %>% 
                       str_replace_all("\\b[Aa]n?\\b|\\b[Oo]f\\b|\\b[Oo]n\\b|\\b[Tt]he\\b", "") %>%
                       str_replace("^([^,]*),.*", "\\1") %>% 
                       str_replace_all("\\s+", " ") %>% 
                       str_trim()) %>% 
-        arrange(cited_author, short_title, cited_year) %>% 
-        distinct(cited_author, short_title, .keep_all = TRUE)
+            arrange(cited_author, cited_year) %>% 
+            distinct(cited_author, .keep_all = TRUE)
+    } else {
+        cited_info <- df %>% 
+            select(cited_author, cited_year)
+    }
+    
     if (verbose) cat("Now searching for: \n")
     
     x <- invoke_rows(.d = cited_info,
                      .collate = "rows",
-                     .f = function(cited_author, cited_year, short_title) {
+                     .f = function(cited_author, cited_year) {
                          if (verbose) cat(paste("\t", cited_author, cited_year, "\n"))
                          later_works <- corpus_df %>% 
                              filter(date >= cited_year)
@@ -58,7 +68,7 @@ find_citing <- function(df, corpus, verbose = TRUE) {
                                         str_replace("-", " ") %>% 
                                         str_trim(),
                                     cited = paste(cited_author, cited_year)) %>% 
-                             omit_duplicate_sources() %>% 
+                             omit_duplicates() %>% 
                              select(id, author, date, title, everything()) 
                      } )
     return(x)

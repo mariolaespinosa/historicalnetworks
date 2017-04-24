@@ -19,8 +19,6 @@
 #' stringr::str_detect(sentences, match_near(colors, "car|bus", 5))
 #' stringr::str_detect(sentences, match_near(colors, "car", 10))
 #' 
-#' @importFrom dplyr `%>%` select mutate filter
-#' @importFrom stringr str_detect
 #'
 #' @export
 

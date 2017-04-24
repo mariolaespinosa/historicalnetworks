@@ -20,7 +20,7 @@
 #'
 #' @examples
 #' 
-#' @importFrom dplyr `%>%` select mutate
+#' @importFrom dplyr "%>%" select mutate
 #' @importFrom stringr str_detect word
 #'
 #' @export

@@ -20,7 +20,7 @@
 #' }
 #'
 #' @import internetarchive
-#' @importFrom dplyr `%>%` select mutate filter group_by
+#' @importFrom dplyr "%>%" select mutate filter group_by
 #' @importFrom tidyr spread
 #' @importFrom stringr str_detect str_extract str_replace str_replace_all
 #' @importFrom beepr beep
