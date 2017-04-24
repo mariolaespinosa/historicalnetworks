@@ -15,7 +15,7 @@
 #' @return A dataframe representing the corpus of downloaded texts
 #'
 #' @examples
-#' #' \dontrun{
+#' \dontrun{
 #'  yf_corpus <- build_corpus(keywords = "yellow fever")
 #' }
 #'
