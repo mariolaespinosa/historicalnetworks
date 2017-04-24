@@ -12,8 +12,12 @@
 #' @return A dataframe
 #'
 #' @examples
+#' \dontrun{
+#'  miasma_yf <- subset_corpus(yf_corpus, "miasma")
+#' }
 #' 
-#' @importFrom dplyr `%>%` select mutate filter
+#' 
+#' @importFrom dplyr "%>%" select mutate filter
 #' @importFrom stringr str_detect
 #'
 #' @export
