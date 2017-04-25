@@ -17,7 +17,7 @@
 #' }
 #' 
 #' 
-#' @importFrom dplyr "%>%" select mutate filter
+#' @importFrom dplyr "%>%" select mutate filter arrange
 #' @importFrom stringr str_detect
 #'
 #' @export
@@ -26,7 +26,8 @@ subset_corpus <- function(corpus, pattern) {
     matching_texts <- corpus %>% 
         mutate(matching = detect_in_file(local_file, p = pattern)) %>% 
         filter(matching) %>% 
-        select(-matching)
+        select(-matching) %>%
+        arrange(author, date, cited)
     
     return(matching_texts)
 }
