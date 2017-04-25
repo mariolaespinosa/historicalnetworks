@@ -27,7 +27,7 @@ subset_corpus <- function(corpus, pattern) {
         mutate(matching = detect_in_file(local_file, p = pattern)) %>% 
         filter(matching) %>% 
         select(-matching) %>%
-        arrange(author, date, cited)
+        arrange(author, date)
     
     return(matching_texts)
 }
