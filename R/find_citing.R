@@ -55,7 +55,7 @@ find_citing <- function(corpus, df, near, max_distance = 250, verbose = TRUE) {
                              select(-citing) %>% 
                              progress_message(., verbose = verbose) %>% 
                              mutate(archive_link = paste0("http://archive.org/stream/", id,
-                                                          "#search/", cited_author),
+                                                          "#search/", str_replace(cited_author, " ", "+")),
                                     city = ifelse(str_detect(publisher, ":"), 
                                                   str_extract(publisher, "^.*?(?=:)") %>% 
                                                       str_replace("(^[^,]*).*", "\\1"),
