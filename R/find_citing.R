@@ -46,7 +46,10 @@ find_citing <- function(corpus, df, near, max_distance = 250, verbose = TRUE) {
                      .f = function(cited_author, cited_year) {
                          if (verbose) cat(paste("\t", cited_author, cited_year, "\n"))
                          later_works <- corpus %>% 
-                             filter(date >= cited_year)
+                             filter(date >= cited_year) %>% 
+                             filter(cited_author != ifelse(str_detect(author, ","), 
+                                                     str_replace(author, "(^[^,]*).*", "\\1"),
+                                                     author))
                          citing_works <- later_works %>%  
                              mutate(citing = ifelse(cited_year <= date, 
                                                     detect_in_file(local_file, cited_author),
@@ -64,12 +67,34 @@ find_citing <- function(corpus, df, near, max_distance = 250, verbose = TRUE) {
                                         str_replace_all("[\\[\\]]", "") %>%
                                         str_replace("-", " ") %>% 
                                         str_trim(),
-                                    cited = paste(cited_author, cited_year)) %>% 
-                             omit_duplicates() %>% 
-                             select(id, author, date, title, everything()) 
+                                    cited = paste(cited_author, cited_year)) 
+                         if (nrow(citing_works) > 1) {
+                             citing_works <- citing_works %>% 
+                                 omit_duplicates()
+                         }
+                         if (identical(citing_works, list(character(0)))) {
+                             citing_works <- data_frame(id = character(0), 
+                                                        author = character(0),
+                                                        date = numeric(0),
+                                                        title = character(0),
+                                                        cited = character(0),
+                                                        city = character(0),
+                                                        publisher = character(0),
+                                                        creator2 = character(0),
+                                                        volume = character(0),
+                                                        url = character(0),
+                                                        local_file = character(0),
+                                                        archive_link = character(0),
+                                                        classification = numeric(0)) 
+                         }
+                         citing_works <- citing_works %>% 
+                             select(-.row, id, author, date, title, everything())
+                         return(citing_works)
                      } )
+    
+    x <- x[!duplicated(names(x))]
     x <- x %>% 
-        select(-cited_author, -cited_year)
+        select(-cited_author, -cited_year, -.row)
     
     if (!missing(near)) {
         x_list <- split(x, f = x$cited)
