@@ -39,12 +39,15 @@ omit_duplicates <- function(df, exact = FALSE) {
                                          tolower()),
                volume2 = FALSE) 
     
-    for (i in 2:nrow(df_new)) {
-        df_new$volume2[i] = (as.numeric(adist(df_new$id[i], df_new$id[i-1])) == 1 & 
-                                 df_new$title_short[i] == df_new$title_short[i-1] &
-                                 df_new$date[i] == df_new$date[i-1])
+    if (nrow(df_new) > 1) {
+        for (i in 2:nrow(df_new)) {
+            df_new$volume2[i] = (as.numeric(adist(df_new$id[i], df_new$id[i-1])) == 1 & 
+                                     df_new$title_short[i] == df_new$title_short[i-1] &
+                                     df_new$date[i] == df_new$date[i-1])
+        }
+    } else {
+        df_new$volume2 <- NA
     }
-
         
     if (exact) {
         df_new <- df_new %>% 
