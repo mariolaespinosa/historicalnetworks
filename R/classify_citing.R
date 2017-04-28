@@ -47,6 +47,7 @@ classify_citing <- function(df, save_dir = ".") {
         examine_citing(df = df, file = file_name)
     } else {
         suppressMessages(df_classified <- read_csv(file_name))
+        if ("classification" %in% names(df)) df <- df %>% select(-classification)
         df_all <- df
         df <- merge(df_all, df_classified, by = c("id", "cited"), all.x = TRUE) %>% 
             filter(is.na(classification))

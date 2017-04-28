@@ -88,7 +88,7 @@ find_citing <- function(corpus, df, near, max_distance = 250, verbose = TRUE) {
                                                         classification = numeric(0)) 
                          }
                          citing_works <- citing_works %>% 
-                             select(-.row, id, author, date, title, everything())
+                             select(id, author, date, title, everything())
                          return(citing_works)
                      } )
     
