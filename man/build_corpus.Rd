@@ -29,7 +29,7 @@ A dataframe representing the corpus of downloaded texts
 Details needed
 }
 \examples{
-#' \dontrun{
+\dontrun{
  yf_corpus <- build_corpus(keywords = "yellow fever")
 }
 

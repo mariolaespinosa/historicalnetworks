@@ -4,7 +4,7 @@
 \alias{match_near}
 \title{Generate a Regular Expression for Finding Two Patterns Occurring Near Each Other}
 \usage{
-match_near(pattern1, pattern2, max_distance)
+match_near(pattern1, pattern2, max_distance = 250)
 }
 \arguments{
 \item{pattern1, pattern2}{Two character strings each containing a word or a \link[regular expression]{stringi-search-regex} to be found near each other.}
