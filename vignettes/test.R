@@ -20,7 +20,7 @@ yf_corpus_race <- yf_corpus %>%
     subset_corpus(race_pattern)
 
 lining_race_1g <- yf_corpus_race %>% 
-     find_citing(data_frame(cited_author = "Lining", cited_year = 1756), near = race_pattern)
+    find_citing(data_frame(cited_author = "Lining", cited_year = 1756), near = race_pattern)
 
 classified_lining_race_1g <- classify_citing(lining_race_1g) %>% 
     filter(classification > 0) %>% 
@@ -42,10 +42,9 @@ cross_cites <- bind_rows(classified_lining_race_1g,
 classified_cross_cites <- classify_citing(cross_cites) %>% 
     filter(classification > 0)
 
-race_cites <- bind_rows(classified_lining_race_1g,
-                        classified_lining_race_2g,
-                        classified_cross_cites) %>% 
-    select(-.row) %>% 
+all_cites <- bind_rows(classified_lining_race_1g,
+                       classified_lining_race_2g,
+                       classified_cross_cites) %>% 
     distinct() %>% 
     mutate(citing_author = if_else(str_detect(author, ","), 
                                    str_replace(author, "(^[^,]*).*", "\\1"),
@@ -53,7 +52,10 @@ race_cites <- bind_rows(classified_lining_race_1g,
            citing_author = recode(citing_author,
                                   "Great Britain. General Board of Health" = "GB GBH",
                                   "Jones" = "Jones and Allen"),
-           citing = paste(citing_author, date)) %>% 
-    select(cited, citing, date, classification) %>% 
-    bind_rows(data_frame(citing = "Lining 1756", date = 1756, classification = 1))
+           citing = paste(citing_author, date),
+           cited = recode(cited,
+                          "Jones 1794" = "Jones and Allen 1794")) %>% 
+    select(cited, citing, date, classification)
 
+lining_plot <- citation_network_plot(all_cites) +
+    theme(legend.position="none")
