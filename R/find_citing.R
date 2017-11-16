@@ -22,6 +22,7 @@
 #' 
 #' @importFrom dplyr "%>%" select mutate filter bind_rows
 #' @importFrom stringr str_detect str_replace
+#' @importFrom purrrlyr invoke_rows
 #'
 #' @export
 
@@ -41,7 +42,7 @@ find_citing <- function(corpus, df, near, max_distance = 250, verbose = TRUE) {
     
     if (verbose) cat("Now searching for: \n")
     
-    x <- invoke_rows(.d = cited_info,
+    x <- purrrlyr::invoke_rows(.d = cited_info,
                      .collate = "rows",
                      .f = function(cited_author, cited_year) {
                          if (verbose) cat(paste("\t", cited_author, cited_year, "\n"))
