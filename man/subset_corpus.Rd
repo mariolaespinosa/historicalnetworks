@@ -15,7 +15,7 @@ subset_corpus(corpus, pattern)
 A dataframe
 }
 \description{
-\code{subset_corpus} returns the works in a corpus whose texts include all of the words (or match the \link[regular expression]{stringi-search-regex}) specified in the `pattern` argument
+\code{subset_corpus} returns the works in a corpus whose texts include all of the words (or match the \link[regular expression]{stringi-search-regex}) specified in the `pattern` argument.
 }
 \details{
 \code{subset_corpus} returns the works in a corpus whose texts include all of the words (or match the \link[regular expression]{stringi-search-regex}) specified in the `pattern` argument.  It can therefore be used to identify a subset of the corpus that is of particular interest.

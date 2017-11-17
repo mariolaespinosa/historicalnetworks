@@ -1,5 +1,4 @@
 library(tidyverse)
-library(stringr)
 library(historicalnetworks)
 
 # yf_corpus <- build_corpus(keywords = "yellow fever",
@@ -57,5 +56,5 @@ all_cites <- bind_rows(classified_lining_race_1g,
                           "Jones 1794" = "Jones and Allen 1794")) %>% 
     select(cited, citing, date, classification)
 
-lining_plot <- citation_network_plot(all_cites) +
-    theme(legend.position="none")
+lining_plot <- citation_network_plot(all_cites)
+

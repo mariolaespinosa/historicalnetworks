@@ -1,8 +1,8 @@
 Package: historicalnetworks
 Type: Package
 Title: Mapping Historical Citation Networks
-Version: 0.1.0
-Date: 2017-04-22
+Version: 0.2.0
+Date: 2017-11-17
 Authors@R: c(
     person("Mariola", "Espinosa", email = "mariola-espinosa@uiowa.edu", role = c("aut")),
     person("Frederick", "Solt", email = "frederick-solt@uiowa.edu", role = c("aut", "cre")))
@@ -20,5 +20,7 @@ Imports:
   dplyr,
   tidyr,
   stringr,
-  beepr
+  beepr,
+  ggplot2,
+  ggnetwork
 RoxygenNote: 6.0.1

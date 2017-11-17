@@ -2,7 +2,7 @@
 % Please edit documentation in R/find_citing.R
 \name{find_citing}
 \alias{find_citing}
-\title{find_citing}
+\title{Identify Potentially Citing Works}
 \usage{
 find_citing(corpus, df, near, max_distance = 250, verbose = TRUE)
 }
@@ -11,9 +11,9 @@ find_citing(corpus, df, near, max_distance = 250, verbose = TRUE)
 
 \item{df}{A dataframe representing downloaded texts (the "cited works") whose citation histories are sought; see details.}
 
-\item{near}{}
+\item{near}{An optional regex pattern that, if specified, must be near to a potential citation.}
 
-\item{max_distance}{}
+\item{max_distance}{The maximum number of words between the \code{near} pattern and the potential citation; the default value is 250.}
 
 \item{verbose}{Should the function provide information about its progress?}
 }
@@ -21,7 +21,7 @@ find_citing(corpus, df, near, max_distance = 250, verbose = TRUE)
 A dataframe
 }
 \description{
-\code{find_citing} does stuff
+\code{find_citing} identifies those texts within a corpus that potentially cite to a collection of cited works
 }
 \details{
 The `find_citing` function casts a broad net for citing works, returning all works that include the cited work's author's last name that were published in or after the cited work's year of publication.
