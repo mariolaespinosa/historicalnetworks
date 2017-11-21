@@ -2,7 +2,7 @@
 #'
 #' \code{build_corpus} downloads the OCR text versions of works found by searching the Internet Archive's metadata for the specified `keywords` over a given `date_range` (provided in the format "yyyy TO yyyy"), and it returns a dataframe that includes the Internet Archive's metadata about the retrieved works along with the location of the corresponding text files.
 #' 
-#' @param keywords The keywords to search in the metadata of the Internet Archive's text collection
+#' @param keywords A vector of keywords to search in the metadata of the Internet Archive's text collection
 #' @param date_range The desired data range to search, specified in the format "yyyy TO yyyy"
 #' @param download_dir The directory (relative to your working directory) to
 #'   which files from the Internet Archive will be downloaded.
@@ -21,6 +21,7 @@
 #'
 #' @import internetarchive
 #' @importFrom dplyr "%>%" select mutate filter group_by
+#' @importFrom purrr map
 #' @importFrom tidyr spread
 #' @importFrom stringr str_detect str_extract str_replace str_replace_all
 #' @importFrom beepr beep
@@ -30,10 +31,15 @@
 build_corpus <- function(keywords, 
                          date_range = "1700 TO 1899",
                          download_dir = "data-raw/corpus",
-                         max_results = "10000",
+                         max_results = 10000,
                          chime = TRUE) {
-    found_items <- ia_search(c(text = keywords, date = date_range), 
-                             num_results = max_results) %>% 
+    found_items <- purrr::map(keywords, function(keyword) {
+        ia_search(c(text = keyword, date = date_range), 
+                             num_results = max_results)
+        }) %>% 
+        unlist() %>% 
+        unique() %>% 
+        sort() %>% 
         ia_get_items()
     
     metadata <- found_items %>% 
