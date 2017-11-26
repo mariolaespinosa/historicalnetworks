@@ -23,6 +23,7 @@
 #' @importFrom dplyr "%>%" select mutate filter group_by
 #' @importFrom purrr map
 #' @importFrom tidyr spread
+#' @importFrom tools file_ext
 #' @importFrom stringr str_detect str_extract str_replace str_replace_all
 #' @importFrom beepr beep
 #'
@@ -43,7 +44,7 @@ build_corpus <- function(keywords,
         ia_get_items()
     
     metadata <- found_items %>% 
-        ia_metadata() %>% 
+        ia_metadata2() %>% 
         tidyr::spread(key = field, value = value) %>% 
         select(id, title, date, creator, creator1, creator2, volume, publisher) %>% 
         mutate(author = ifelse(is.na(creator), creator1, creator),
@@ -61,10 +62,10 @@ build_corpus <- function(keywords,
         select(id, author, date, title, city, publisher, creator2, volume)
     
     dir.create(download_dir, recursive = TRUE, showWarnings = FALSE) 
-    
+
     corpus <- metadata %>% 
         left_join(found_items %>% 
-                      ia_files() %>% 
+                      ia_files2() %>% 
                       filter(str_detect(file, "djvu\\.txt$")) %>% 
                       group_by(id) %>% 
                       ia_download(dir = download_dir, overwrite = FALSE)) %>% 
@@ -76,4 +77,35 @@ build_corpus <- function(keywords,
     }
     
     return(corpus)
+}
+
+ia_metadata2 <- function(items) {
+    metadata_to_data_frame <- function(i) {
+        m <- unlist(i$metadata)
+        if (is.character(unlist(i$metadata$identifier))) {
+            data_frame(id = unlist(i$metadata$identifier), field = names(m), 
+                       value = unname(m)) 
+        } else {
+            data_frame(id = NA_character_, field = NA_character_, 
+                       value = NA_character_)
+        }
+    }
+    dfs <- lapply(items, metadata_to_data_frame)
+    bind_rows(dfs) %>% filter(!is.na(id))
+}
+
+
+ia_files2 <- function (items) {
+    files_to_data_frame <- function(i) {
+        f <- unlist(names(i$files))
+        if (is.character(unlist(i$metadata$identifier))) {
+            data_frame(id = unlist(i$metadata$identifier), file = f, 
+                       type = tools::file_ext(file)) 
+        } else {
+            data_frame(id = NA_character_, file = NA_character_, 
+                       type = NA_character_)
+        }
+    }
+    dfs <- lapply(items, files_to_data_frame)
+    bind_rows(dfs)
 }
