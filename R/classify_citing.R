@@ -62,8 +62,17 @@ classify_citing <- function(df, save_dir = ".") {
 examine_citing <- function(df, file) {
     for (i in seq_along(df$archive_link)) {
         browseURL(df$archive_link[i])
-        code <- readline(prompt="Enter classification and press [return] to continue to next citation ")
-        cat(paste0(df$id[i],",", df$cited[i],",", code),
-            file = file, sep="\n", append = TRUE)
+        code <- readline(prompt="Enter classification and press [return] to continue ")
+        if (as.numeric(code) > 0) {
+            page <- readline(prompt="Enter page number and press [return] to continue ")
+            notes <- readline(prompt="Enter notes and press [return] to continue to next citation ")
+        } else {
+            page <- ""
+            notes <- ""
+        }
+        if (!code == "") {
+            cat(paste(df$id[i], df$cited[i], code, page, notes, sep = ","),
+                file = file, sep="\n", append = TRUE)            
+        }
     }
 }
