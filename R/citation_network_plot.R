@@ -26,7 +26,7 @@
 #'
 #' @export
 
-citation_network_plot <- function(citations, cited_only, time_axis = "x",
+citation_network_plot <- function(citations, cited_only, time_axis = "x", by = NULL,
                                   color_plot = TRUE, custom_plot = FALSE, arrow_gap = .015) {
     
     if (missing(cited_only)) {
@@ -137,8 +137,8 @@ layout_cite <- function(d, seed = 324, trials = 100, root_source) {
     n <- nrow(d_mat)
     y_real <- get.vertex.attribute(d, "year")
     y <- get.vertex.attribute(d, "year") %>% jitter(amount = 1)
-    y_range <- max(y) - min(y)
-    n_y <- data_frame(y = y) %>%
+    y_range <- max(y_real) - min(y_real)
+    n_y <- data_frame(y = y_real) %>%
         group_by(y) %>% 
         mutate(n_y = n()) %>% 
         ungroup() %>% 
@@ -151,10 +151,10 @@ layout_cite <- function(d, seed = 324, trials = 100, root_source) {
         x <- purrr::map_dbl(n_y, function(x) {
             seq(from = -y_range, to = y_range, length.out = x + 5) %>% 
                 sample(size = 1) %>% 
-                jitter(amount = y_range/20)
+                jitter(amount = y_range/50)
         })
         if (!missing(root_source)) {
-            x[root] <- 0 
+            x[root] <- 0
         }
         x_old <- x
         
@@ -165,8 +165,8 @@ layout_cite <- function(d, seed = 324, trials = 100, root_source) {
             x_old <- x
             theta <- acos(t(outer(x, x, "-"))/dis) * sign(t(outer(y, y, "-")))
             
-            # horizontal attraction between nodes with ties
-            a_dx <- apply(ds * cos(theta) * dis/10, 
+            # attraction, on non-time dimension, between nodes with ties
+            a_dx <- apply((ds * cos(theta) * dis)/50, 
                           1, sum, na.rm = TRUE)
             
             x <- (x + a_dx) %>% 
@@ -175,12 +175,14 @@ layout_cite <- function(d, seed = 324, trials = 100, root_source) {
             dis <- as.matrix(dist(cbind(x, y)))
             theta <- acos(t(outer(x, x, "-"))/dis) * sign(t(outer(y, y, "-")))
             
-            # vertical attraction between nodes and actual years
+            # attraction, on time dimension, between nodes and actual years
             y <- (y_real + y)/2
             
             # repulsion between close nodes
-            r_dx <- apply(cos(theta) * y_range^2/(2*dis^2), 
-                          1, sum, na.rm = TRUE)
+            r_dx <- apply(cos(theta) * y_range/dis^2, 
+                          1, sum, na.rm = TRUE) %>% 
+                pmin(., y_range*2) %>% 
+                pmax(., -y_range*2)
             r_dy <- apply(sin(theta) * y_range/dis^2, 
                           1, sum, na.rm = TRUE) %>% 
                 pmin(., y_range/100) %>% 
@@ -209,7 +211,7 @@ layout_cite <- function(d, seed = 324, trials = 100, root_source) {
 format_network <- function(model, 
                            layout,
                            weights = NULL,
-                           by = NULL,
+                           by = by,
                            ...) {
     x = model
     
