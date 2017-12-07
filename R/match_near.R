@@ -23,7 +23,7 @@
 #' @export
 
 match_near <- function(pattern1, pattern2, max_distance = 250) {
-    pattern <- paste0("\\b(", pattern1, ")\\W+(?:\\w+\\W+){1,", max_distance, "}?(", pattern2,
-                      ")\\b|(", pattern2,")\\W+(?:\\w+\\W+){1,", max_distance,"}?(", pattern1, ")\\b")
+    pattern <- paste0("\\b(\\w*", pattern1, "\\w*)\\W+(?:\\w+\\W+){1,", max_distance, "}?(\\w*", pattern2,
+                      "\\w*)\\b|(\\w*", pattern2,"\\w*)\\W+(?:\\w+\\W+){1,", max_distance,"}?(\\w*", pattern1, "\\w*)\\b")
     return(pattern)
 }
