@@ -32,7 +32,7 @@
 #' 
 #' @seealso \code{\link{find_citing}}
 #' 
-#' @importFrom dplyr "%>%" filter arrange
+#' @importFrom dplyr "%>%" filter arrange left_join
 #' @importFrom readr read_csv
 #'
 #' @export
@@ -40,17 +40,18 @@
 classify_citing <- function(df, save_dir = ".") {
     file_name <- file.path(save_dir, paste0("classify_", deparse(substitute(df)), ".csv"))
     df <- df %>%
-        arrange(author, date, cited)
+        arrange(year, author, cited)
     if (!file.exists(file_name)) {
         file.create(file_name)
-        cat("id, cited, classification", file = file_name, sep="\n")
+        cat("id, cited, classification, page, notes", file = file_name, sep="\n")
         examine_citing(df = df, file = file_name)
     } else {
         suppressMessages(df_classified <- read_csv(file_name))
         if ("classification" %in% names(df)) df <- df %>% select(-classification)
         df_all <- df
-        df <- merge(df_all, df_classified, by = c("id", "cited"), all.x = TRUE) %>% 
-            filter(is.na(classification))
+        df <- left_join(df_all, df_classified, by = c("id", "cited"), all.x = TRUE) %>% 
+            filter(is.na(classification)) %>% 
+            arrange(year, author, cited)
         examine_citing(df = df, file = file_name)
         df <- df_all
     }
@@ -63,7 +64,7 @@ examine_citing <- function(df, file) {
     for (i in seq_along(df$archive_link)) {
         browseURL(df$archive_link[i])
         code <- readline(prompt="Enter classification and press [return] to continue ")
-        if (as.numeric(code) > 0) {
+        if (code!="" & as.numeric(code) > 0) {
             page <- readline(prompt="Enter page number and press [return] to continue ")
             notes <- readline(prompt="Enter notes and press [return] to continue to next citation ")
         } else {
