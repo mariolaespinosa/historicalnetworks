@@ -26,12 +26,13 @@
 #'
 #' @export
 
+
 find_citing <- function(corpus, df, near, max_distance = 250, verbose = TRUE) {
     if (!("cited_author" %in% names(df)) | !("cited_year" %in% names(df))) {
         cited_info <- df %>%
-            transmute(cited_author = ifelse(str_detect(author, ","), 
+            transmute(cited_author = if_else(str_detect(author, ","), 
                                             str_replace(author, "(^[^,]*).*", "\\1"),
-                                            author),
+                                            word(author, -1)),
                       cited_year = date) %>% 
             arrange(cited_author, cited_year) %>% 
             distinct(cited_author, .keep_all = TRUE)
