@@ -40,7 +40,7 @@
 classify_citing <- function(df, save_dir = ".") {
     file_name <- file.path(save_dir, paste0("classify_", deparse(substitute(df)), ".csv"))
     df <- df %>%
-        arrange(year, author, cited)
+        arrange(date, author, cited)
     if (!file.exists(file_name)) {
         file.create(file_name)
         cat("id, cited, classification, page, notes", file = file_name, sep="\n")
@@ -51,7 +51,7 @@ classify_citing <- function(df, save_dir = ".") {
         df_all <- df
         df <- left_join(df_all, df_classified, by = c("id", "cited"), all.x = TRUE) %>% 
             filter(is.na(classification)) %>% 
-            arrange(year, author, cited)
+            arrange(date, author, cited)
         examine_citing(df = df, file = file_name)
         df <- df_all
     }

@@ -63,6 +63,9 @@ find_citing()
 
 
 ## Confirming Citing Works
+```{r eval=FALSE}
+classify_citing()
 
+```
 
 

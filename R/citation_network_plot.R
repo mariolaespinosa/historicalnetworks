@@ -18,19 +18,28 @@
 #' 
 #' @importFrom dplyr "%>%" select mutate filter bind_rows
 #' @importFrom stringr str_extract
-#' @importFrom network network "%v%<-" get.vertex.attribute
+#' @importFrom network network "%v%<-" "%v%" get.vertex.attribute
 #' @importFrom sna as.sociomatrix.sna symmetrize
 #' @importFrom purrr map_dbl
+#' @importFrom tibble tibble
 #' @import ggnetwork
 #' @import ggplot2
 #'
 #' @export
 
-citation_network_plot <- function(citations, cited_only, time_axis = "x", by = NULL,
-                                  color_plot = TRUE, custom_plot = FALSE, arrow_gap = .015) {
+citation_network_plot <- function(citations, 
+                                  cited_only, 
+                                  stages,
+                                  root_source,
+                                  label_only_cited = FALSE,
+                                  color_plot = TRUE, 
+                                  custom_plot = FALSE, 
+                                  arrow_gap = .015, 
+                                  time_axis = "x",
+                                  seed = 324) {
     
     if (missing(cited_only)) {
-        cited_only <- data_frame(citing = citations$cited[!citations$cited %in% citations$citing]) %>% 
+        cited_only <- tibble(citing = citations$cited[!citations$cited %in% citations$citing]) %>% 
             mutate(year = str_extract(citing, "\\d{4}") %>% 
                        as.numeric(),
                    classification = 1) %>% 
@@ -49,22 +58,52 @@ citation_network_plot <- function(citations, cited_only, time_axis = "x", by = N
     if (!("classification" %in% names(citations))) {
         citations$classification <- 1
     }
-    
+
     cited_works <- citations %>% 
         group_by(citing) %>% 
         summarize(classification = max(classification),
                   year = as.numeric(min(date))) %>% 
         ungroup() %>% 
         bind_rows(cited_only) %>% 
-        arrange(citing)
-
-    cite_net <- network(citations, matrix.type = "edgelist")
-    cite_net %v% "year" <- cited_works$year
-    cite_net %v% "classification" <- cited_works$classification
+        mutate(only_citing = !(citing %in% citations$cited))
     
-    layout <- layout_cite(cite_net)
-
-    cite_network <- format_network(cite_net, layout = layout, arrow.gap = arrow_gap)
+    cite_net <- network::network(citations %>% 
+                                     select(-date), matrix.type = "edgelist")
+    cite_net %v% "year" <- cited_works[order(match(cited_works[["citing"]],
+                                                   cite_net %v% "vertex.names")), ] %>% 
+        pull(year)
+    cite_net %v% "classification" <- cited_works[order(match(cited_works[["citing"]],
+                                                             cite_net %v% "vertex.names")), ] %>% 
+        pull(classification)
+    cite_net %v% "only_citing" <- cited_works[order(match(cited_works[["citing"]],
+                                                          cite_net %v% "vertex.names")), ] %>% 
+        pull(only_citing)
+    
+    if (!missing(stages)) {
+        stages <- tibble(year = seq(min(cited_works$year), max(cited_works$year))) %>% 
+                             mutate(stage_breaks = year %in% stages,
+                                    stage = cumsum(stage_breaks))
+        cited_works <- cited_works %>%
+            left_join(stages, by = "year")
+    } else {
+        cited_works$stage <- 1
+    }
+    cite_net %v% "stage" <- cited_works[order(match(cited_works[["citing"]],
+                                                    cite_net %v% "vertex.names")), ] %>% 
+        pull(stage)
+    
+    if (missing(root_source)) {
+        layout <- layout_cite(cite_net, seed = seed)
+    } else {
+        layout <- layout_cite(cite_net, seed = seed, root_source = root_source)
+    }
+    
+    cite_network <- format_network(cite_net, layout = layout, arrow.gap = arrow_gap, by = "stage")
+    
+    if (label_only_cited == TRUE) {
+        cite_network <- cite_network %>% 
+            mutate(vertex.names = if_else(!only_citing, vertex.names, NA_character_))
+    }
     
     if (!custom_plot) {
         if (color_plot) {
@@ -73,13 +112,17 @@ citation_network_plot <- function(citations, cited_only, time_axis = "x", by = N
                 geom_edges(color = "grey85",
                            arrow = arrow(length = unit(5, "pt")),
                            curvature = 0.05) +
-                geom_nodes(size = 6, aes(color = as.factor(cite_network$classification))) +
+                geom_nodes(size = 6, aes(color = as.factor(classification))) +
                 geom_nodetext(aes(label = vertex.names)) +
                 # theme_blank() + 
-                theme(legend.background = element_blank(), legend.key = element_blank(),
-                      panel.background = element_blank(), panel.border = element_blank(),
-                      strip.background = element_blank(), plot.background = element_blank(),
-                      axis.line = element_blank(), panel.grid = element_blank()) +
+                theme(legend.background = element_blank(),
+                      legend.key = element_blank(),
+                      panel.background = element_blank(),
+                      panel.border = element_blank(),
+                      strip.background = element_blank(),
+                      plot.background = element_blank(),
+                      axis.line = element_blank(),
+                      panel.grid = element_blank()) +
                 scale_color_manual(values = c("1" = "grey75", "2" = "red")) +
                 theme(legend.position="none") 
         } else {
@@ -88,7 +131,7 @@ citation_network_plot <- function(citations, cited_only, time_axis = "x", by = N
                 geom_edges(color = "grey85",
                            arrow = arrow(length = unit(5, "pt")),
                            curvature = 0.05) +
-                geom_nodes(size = 6, aes(shape = as.factor(cite_network$classification))) +
+                geom_nodes(size = 6, aes(shape = as.factor(classification))) +
                 geom_nodetext(aes(label = vertex.names)) +
                 theme_blank() + 
                 scale_shape_manual(values = c(16, 21)) +
@@ -122,7 +165,7 @@ citation_network_plot <- function(citations, cited_only, time_axis = "x", by = N
 }
 
 
-layout_cite <- function(d, seed = 324, trials = 100, root_source) {
+layout_cite <- function(d, seed, trials = 100, root_source) {
     set.seed(seed)
     
     if (!missing(root_source)) {
@@ -138,7 +181,7 @@ layout_cite <- function(d, seed = 324, trials = 100, root_source) {
     y_real <- get.vertex.attribute(d, "year")
     y <- get.vertex.attribute(d, "year") %>% jitter(amount = 1)
     y_range <- max(y_real) - min(y_real)
-    n_y <- data_frame(y = y_real) %>%
+    n_y <- tibble(y = y_real) %>%
         group_by(y) %>% 
         mutate(n_y = n()) %>% 
         ungroup() %>% 
@@ -252,24 +295,25 @@ format_network <- function(model,
     # }
     
     # import edge attributes
-    for (y in network::list.edge.attributes(x)) {
-        edges = cbind(edges, network::get.edge.attribute(x, y))
-        names(edges)[ncol(edges)] = y
-    }
+    # for (y in network::list.edge.attributes(x)) {
+    #     edges = cbind(edges, network::get.edge.attribute(x, y))
+    #     names(edges)[ncol(edges)] = y
+    # }
     
     # merge edges and nodes data
-    edges = merge(nodes, edges, by = c("x", "y"), all = TRUE)
+    edges = left_join(edges, 
+                      nodes,
+                      by = c("x", "y"))
     
     # add missing columns to nodes data
     nodes$xend = nodes$x
     nodes$yend = nodes$y
-    names(nodes) = names(edges)[1:ncol(nodes)]
-    
-    # make nodes data of identical dimensions to edges data
-    for (y in names(edges)[(1 + ncol(nodes)):ncol(edges)]) {
-        nodes = cbind(nodes, NA)
-        names(nodes)[ncol(nodes)] = y
-    }
+
+    # # make nodes data of identical dimensions to edges data
+    # for (y in names(edges)[(1 + ncol(nodes)):ncol(edges)]) {
+    #     nodes = cbind(nodes, NA)
+    #     names(nodes)[ncol(nodes)] = y
+    # }
     
     # panelize nodes (for temporal networks)
     if (!is.null(by)) {

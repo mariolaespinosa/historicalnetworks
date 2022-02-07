@@ -4,11 +4,16 @@
 \alias{build_corpus}
 \title{Build a Corpus of Works from the Internet Archive}
 \usage{
-build_corpus(keywords, date_range = "1700 TO 1899",
-  download_dir = "data-raw/corpus", max_results = "10000", chime = TRUE)
+build_corpus(
+  keywords,
+  date_range = "1700 TO 1899",
+  download_dir = "data-raw/corpus",
+  max_results = 10000,
+  chime = TRUE
+)
 }
 \arguments{
-\item{keywords}{The keywords to search in the metadata of the Internet Archive's text collection}
+\item{keywords}{A vector of keywords to search in the metadata of the Internet Archive's text collection}
 
 \item{date_range}{The desired data range to search, specified in the format "yyyy TO yyyy"}
 

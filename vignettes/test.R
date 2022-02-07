@@ -9,15 +9,15 @@ library(historicalnetworks)
 
 corpus_keywords1 <- c("yellow fever", "fever", "disease", "medicine", "health", "military hygiene")
 corpus_keywords2 <- c("vomito", "fiebre", "enfermidad", "medicina", "salud", "higiene",
-                     "fièvre", "maladie", "médecine", "santé", "hygiène",
-                     "west indies", "caribbean", "mexico", "new spain")
+                      "fièvre", "maladie", "médecine", "santé", "hygiène",
+                      "west indies", "caribbean", "mexico", "new spain")
 corpus_keywords3 <- c("caribe", "méxico",
-                     "caraïbes", "mexique", "saint domingue")
+                      "caraïbes", "mexique", "saint domingue")
 
 all_corpus1 <- purrr::map_df(corpus_keywords1, function(keyword) {
     corpus_part <- tryCatch({build_corpus(keywords = keyword,
-                                    date_range = "1650 TO 1900",
-                                    max_results = 50000)}, 
+                                          date_range = "1650 TO 1900",
+                                          max_results = 50000)}, 
                             error = function(e) {
                                 tibble(id = "error",
                                        author = keyword)
@@ -53,7 +53,7 @@ keywords_to_redo <- bind_rows(all_corpus1, all_corpus2, all_corpus3) %>%
 
 found_items <- purrr::map(keywords_to_redo, function(keyword) {
     internetarchive::ia_search(c(text = keyword, date = date_range), 
-              num_results = max_results)
+                               num_results = max_results)
 }) %>% 
     unlist() %>% 
     unique() %>% 
@@ -192,16 +192,16 @@ yf_corpus_elevation2 <- yf_corpus_elevation %>%
     subset_corpus(match_near(match_vector(yf_keywords), elevation_pattern))
 
 early_elevation0 <- bind_rows(tibble(cited_author = "Duhamel", cited_year = 1759),
-                             tibble(cited_author = "Lind", cited_year = 1768), # b21365246 (1788 ed); 1768 ed has quote at 198-199
-                             tibble(cited_author = "Monro", cited_year = 1764), # accdisease00monr (cites Duhamel)
-                             tibble(cited_author = "Rollo", cited_year = 1783), # b21947430 (cites Monro and Lind (2d edition))
-                             tibble(cited_author = "Hunter", cited_year = 1788), # * observationsondi00hunt
-                             tibble(cited_author = "Jackson", cited_year = 1791), # * atreatiseonfeve00jackgoog (disagrees, at 87)
-                             tibble(cited_author = "Chisholm", cited_year = 1799), # * 2546006R.nlm.nih.gov; b21299018_0001
-                             tibble(cited_author = "Humboldt", cited_year = 1811), # politicalessayo00blacgoog
-                             tibble(cited_author = "Bally", cited_year = 1814), # b28740476 (pp324-326, 334-336; cites Humboldt and Chisholm as additional examples)
-                             tibble(cited_author = "Dickinson", cited_year = 1819), # * b28741365 at 59 (cites Humboldt)
-                             tibble(cited_author = "Tulloch", cited_year = 1835)) 
+                              tibble(cited_author = "Lind", cited_year = 1768), # b21365246 (1788 ed); 1768 ed has quote at 198-199
+                              tibble(cited_author = "Monro", cited_year = 1764), # accdisease00monr (cites Duhamel)
+                              tibble(cited_author = "Rollo", cited_year = 1783), # b21947430 (cites Monro and Lind (2d edition))
+                              tibble(cited_author = "Hunter", cited_year = 1788), # * observationsondi00hunt
+                              tibble(cited_author = "Jackson", cited_year = 1791), # * atreatiseonfeve00jackgoog (disagrees, at 87)
+                              tibble(cited_author = "Chisholm", cited_year = 1799), # * 2546006R.nlm.nih.gov; b21299018_0001
+                              tibble(cited_author = "Humboldt", cited_year = 1811), # politicalessayo00blacgoog
+                              tibble(cited_author = "Bally", cited_year = 1814), # b28740476 (pp324-326, 334-336; cites Humboldt and Chisholm as additional examples)
+                              tibble(cited_author = "Dickinson", cited_year = 1819), # * b28741365 at 59 (cites Humboldt)
+                              tibble(cited_author = "Tulloch", cited_year = 1835)) 
 # * In all_corpus_raw, but not yf_corpus_elevation2
 
 early_elevation <- all_corpus_raw %>% 
@@ -210,8 +210,8 @@ early_elevation <- all_corpus_raw %>%
                id == "accdisease00monr" | # Monro 1764
                id == "b21947430" | # Rollo 1783
                id == "observationsondi00hunt" | # Hunter 1788
-               id == "atreatiseonfeve00jackgoog" | # Jackson 1791
-               id == "b21299018_0001" |  # Chisholm 1801; not in earlier versions of Chisholm
+               id == "atreatiseonfeve00jackgoog" | # Jackson 1791 at 72, 189
+               id == "b21299018_0001" |  # Chisholm 1801 at 277-278; not in earlier versions of Chisholm
                id == "politicalessayo09humbgoog" | # Humboldt 1811
                id == "b28740476" | # Bally 1814
                id == "b28268428") %>% # Dickinson 1819
@@ -241,10 +241,11 @@ early_elevation2 <- all_corpus_raw %>%
                id == "63540640RX1.nlm.nih.gov" | # Tweedie 1840 at 337
                id == "b29339819" | # Curtis 1839 at 104-105: "Residents in the East or West Indies should be very careful in the choice of the situation of their dwellings: the more elevated, and the further removed from all kinds of water, the better."
                id == "b21454309" | # Alison 1843 at 420 (textbook?) : "the worst fevers of the tropical climates are nearly confined to a moderate elevation above the level of the sea"
-               id == "narrativeatouri02henrgoog" # Tudor 1834 at 161-162
-               ) %>% bind_rows(tibble(id = NA, author = "Tulloch", date = "1835"),
-                tibble(id = NA, author = "Dalmas", date = "1805")) # [Dalmas 1805 at 41 not in archive.org except reprint in mmoiresurlanon00lefo] "J'ai appris du général Thouvenot , chef de l'état-major, que les troupes qui occupoieat le plateau élevé de Plaisance ont toujours joui d'une bonne santé, malgré que la maladie y ait élé plusieurs fois apportée par des personnes qui l'avoient prise au Cap, ou ailleurs"
-               
+               id == "narrativeatouri02henrgoog" | # Tudor 1834 at 161-162
+               id == "b21359076" # Thomas 1808 at 57
+    ) %>% bind_rows(tibble(id = NA, author = "Tulloch", date = "1835"),
+                    tibble(id = NA, author = "Dalmas", date = "1805")) # [Dalmas 1805 at 41 not in archive.org except reprint in mmoiresurlanon00lefo] "J'ai appris du général Thouvenot , chef de l'état-major, que les troupes qui occupoieat le plateau élevé de Plaisance ont toujours joui d'une bonne santé, malgré que la maladie y ait élé plusieurs fois apportée par des personnes qui l'avoient prise au Cap, ou ailleurs"
+
 cross_ee <- early_elevation %>%
     filter(!is.na(local_file)) %>% 
     find_citing(early_elevation, near = elevation_pattern)
@@ -301,7 +302,7 @@ classified_all <- bind_rows(classified_cross_ee,
                             classified_cites_ee2) %>% 
     filter(classification == 1)
 
-elevation_cites <- classified_all %>% 
+elevation_cites0 <- classified_all %>% 
     mutate(author = recode(author,
                            "Royal College of Physicians of London" = "Dickinson, Nodes",
                            "Royal College of Physicians of Edinburgh" = if_else(id == "b21914461", "Johnson", "Arnold"),
@@ -315,10 +316,27 @@ elevation_cites <- classified_all %>%
            city = recode(city,
                          "C. S. Van Winkle" = "New York",
                          "Longman" = "London"),
-           city = if_else(is.na(city), "London", city)) %>% 
-    filter(!str_detect(author, "Rush")) %>% 
-    select(cited, citing, date, classification) %>% 
+           city = if_else(is.na(city), "London", city),
+           classification = if_else((str_detect(city, "London|Glasgow|Edinburgh") | str_detect(author, "Mill")), 1,
+                                    if_else((str_detect(city, "Paris|Bruxelles|(Saint Pierre)") | str_detect(author, "Humboldt|Duhamel|Poupée-Desportes")), 3,
+                                            if_else(str_detect(city, "Philadelphia|(New York)|Boston|Lexington|Charlottesville|Charleston|Cahawba"), 2,
+                                                               if_else(city == "Erlangen", 4, NA_real_)))),
+           stage = if_else(year < 1793, 1,
+                           if_else(year < 1829, 2,
+                                   if_else(year < 1839, 3, 4)))) %>% 
+    filter(!str_detect(author, "Rush"))
+        
+elevation_cites <- elevation_cites0 %>%         
+    select(cited, citing, date, classification, stage) %>% 
     distinct()
+
+elevation_cited_only <- data_frame(citing = elevation_cites$cited[!elevation_cites$cited %in% elevation_cites$citing]) %>% 
+    mutate(year = str_extract(citing, "\\d{4}") %>% 
+               as.numeric(),
+           classification = if_else(str_detect(citing, "Humboldt|Duhamel|Poupée-Desportes|Dalmas|Moreau"), 3, 1)) %>% 
+    distinct()
+
+
 
 # elevation_2g <- yf_corpus_race %>% 
 #     find_citing(classified_elevation_1g, near = elevation_pattern)
@@ -333,5 +351,73 @@ elevation_cites <- classified_all %>%
 # classified_cross_cites <- classify_citing(cross_cites) %>% 
 #     filter(classification > 0)
 
+# cited_works %>% filter(!only_citing) %>% left_join(yf_corpus_all %>%  mutate(citing_author = if_else(str_detect(author, ","), 
+#                                                                                                      str_replace(author, "(^[^,]*).*", "\\1"),
+#                                                                                                      word(author, -1)),
+#                                                                              citing = paste(citing_author, date)), by = "citing") %>% View() #write_csv("cited_works.csv")
 
-elevation_plot <- citation_network_plot(elevation_cites)
+citation_network_plot(elevation_cites, elevation_cited_only, 
+                      label_only_cited = TRUE, custom_plot = TRUE) +
+    geom_edges(color = "grey85",
+               arrow = arrow(length = unit(5, "pt")),
+               curvature = 0.03) +
+    geom_nodes(size = 4, shape = 21,
+               aes(color = as.factor(cite_network$classification),
+                   fill = as.factor(cite_network$classification))) +
+    geom_nodetext(aes(label = vertex.names)) +
+    theme(legend.background = element_blank(), legend.key = element_blank(),
+          panel.background = element_blank(), panel.border = element_blank(),
+          strip.background = element_blank(), plot.background = element_blank(),
+          axis.line = element_blank(), panel.grid = element_blank()) +
+    scale_fill_manual(values = c("1" = "white", "2" = "red", "3" = "blue", "4" = "grey75")) +
+    scale_color_manual(values = c("1" = "red", "2" = "blue", "3" = "red", "4" = "grey75")) +
+    theme(legend.position="none")
+
+ggsave("vignettes/elevation_plot.jpg", width = 11, height = 7)
+ggsave("vignettes/elevation_plot_short.jpg", width = 11, height = 4.5)
+
+citation_network_plot(elevation_cites, elevation_cited_only, 
+                      label_only_cited = TRUE, custom_plot = TRUE,
+                      by = "stage") +
+    geom_edges(color = "grey85",
+               arrow = arrow(length = unit(5, "pt")),
+               curvature = 0.03) +
+    geom_nodes(size = 4, shape = 21,
+               aes(color = as.factor(cite_network$classification),
+                   fill = as.factor(cite_network$classification))) +
+    geom_nodetext(aes(label = vertex.names)) +
+    theme(legend.background = element_blank(), legend.key = element_blank(),
+          panel.background = element_blank(), panel.border = element_blank(),
+          strip.background = element_blank(), plot.background = element_blank(),
+          axis.line = element_blank(), panel.grid = element_blank()) +
+    scale_fill_manual(values = c("1" = "white", "2" = "red", "3" = "blue", "4" = "grey75")) +
+    scale_color_manual(values = c("1" = "red", "2" = "blue", "3" = "red", "4" = "grey75")) +
+    theme(legend.position="none")
+
+# ggplot(cite_network,
+#        aes(x, y, xend = xend, yend = yend)) +
+#     coord_flip() +
+#     theme(
+#         axis.title.y = element_blank(),
+#         axis.text.y = element_blank(),
+#         axis.ticks.y = element_blank(),
+#         axis.title.x = element_blank()) +
+#     scale_y_continuous(breaks = pretty(layout$y, n = 5)) +
+#     expand_limits(y = c(min(pretty(layout$y, n = 5)), max(pretty(layout$y, n = 5)))) +
+#     geom_edges(color = "grey85",
+#                arrow = arrow(length = unit(5, "pt")),
+#                curvature = 0.03) +
+#     geom_nodes(size = 4, shape = 21,
+#                aes(color = as.factor(cite_network$classification),
+#                    fill = as.factor(cite_network$classification))) +
+#     geom_nodetext(aes(label = vertex.names)) +
+#     theme(legend.background = element_blank(), legend.key = element_blank(),
+#           panel.background = element_blank(), panel.border = element_blank(),
+#           strip.background = element_blank(), plot.background = element_blank(),
+#           axis.line = element_blank(), panel.grid = element_blank()) +
+#     scale_fill_manual(values = c("1" = "white", "2" = "red", "3" = "blue", "4" = "grey75")) +
+#     scale_color_manual(values = c("1" = "red", "2" = "blue", "3" = "red", "4" = "grey75")) +
+#     theme(legend.position="none") + facet_wrap(~ stage)
+
+
+
